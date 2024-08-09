@@ -1,18 +1,22 @@
-
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "lexeme.h"
 
 int main(int argv, char* argc[])
 {
     FILE *fptr = NULL;
-    char file_name[] = "test.txt";
-    fptr = fopen(file_name, "r");
+    if (argv < 2) {
+        printf("ERROR: No file is provided!\n");
+        printf("Usage: lexer <file>\n");
+        exit(1);
+    }
 
-    if (fptr == NULL)
-    {
+    char* file_name = argc[1];
+    fptr = fopen(file_name, "rb");
+
+    if (fptr == NULL) {
         printf("ERROR: Could not open file %s\n", file_name);
         exit(1);
     }
@@ -32,7 +36,7 @@ int main(int argv, char* argc[])
     }
 
     // Getting file contents
-    const char special_chars[] = "#!()";
+    const char special_chars[] = "*&#!();_-.?\\:\"'";
     const char white_space[] = " \n\t";
 
     int line_number = 0;
@@ -52,11 +56,9 @@ int main(int argv, char* argc[])
         for (int i = 0; i < strlen(line_contents); i++) {
             col_number++;
             const char ch = line_contents[i];
-            // printf("/%s:%d:%d : %c\n", file_name, line_number, col_number, ch);
 
             if (strchr(special_chars, ch) != NULL || strchr(white_space, ch) != NULL) {
                 if (strlen(buffer) > 0) {
-                    // printf("curr buffer: %s\n", buffer);
                     Position *pos = new_pos(file_name, line_number, col_number);
                     Lexeme *l = new_lexeme(buffer, *pos);
                     print_lexeme(*l);
@@ -77,6 +79,7 @@ int main(int argv, char* argc[])
                 strncat(buffer, &ch, 1);
                 strncpy(buffer+strlen(buffer), "\0", 1);
                 col_number--;
+                continue;
             }
         }
 

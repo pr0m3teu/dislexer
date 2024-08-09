@@ -1,4 +1,4 @@
 #!/bin/bash
 
 set -xe
-clang -o lexer lexer.c lexeme.c
+clang -o lexer -O3 lexer.c lexeme.c
