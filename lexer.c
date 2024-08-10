@@ -4,44 +4,31 @@
 #include <ctype.h>
 #include "lexeme.h"
 
-int main(int argv, char* argc[])
+#define SPECIAL_CHARS "*&#!();_-.?\\:\"'"
+#define WHITE_SPACE " \n\t"
+
+Lexemes* lex_file(FILE* file, const char* file_name)
 {
-    FILE *fptr = NULL;
-    if (argv < 2) {
-        printf("ERROR: No file is provided!\n");
-        printf("Usage: lexer <file>\n");
-        exit(1);
-    }
-
-    char* file_name = argc[1];
-    fptr = fopen(file_name, "rb");
-
-    if (fptr == NULL) {
-        printf("ERROR: Could not open file %s\n", file_name);
-        exit(1);
-    }
-
     // Find EOF
-    fseek(fptr, 0L, SEEK_END);
-    long file_size = ftell(fptr);
-    printf("file %s is %ld bytes long.\n", file_name, file_size);
+    fseek(file, 0L, SEEK_END);
+    long file_size = ftell(file);
+
     // Go back to file start
-    fseek(fptr, 0L, SEEK_SET);
+    fseek(file, 0L, SEEK_SET);
 
     // Allcate buffer for file contents
     char *line_contents = malloc(file_size);
     if (line_contents == NULL){
         printf("ERROR: Could not allocate memory for string.\n");
-        exit(1);
+        return NULL;
     }
 
     // Getting file contents
-    const char special_chars[] = "*&#!();_-.?\\:\"'";
-    const char white_space[] = " \n\t";
-
     int line_number = 0;
     Lexemes *arr = new_darray();
-    while (fgets(line_contents, file_size, fptr))
+
+    if(arr == NULL) return NULL;
+    while (fgets(line_contents, file_size, file))
     {
         line_number++;
         int col_number = 0;
@@ -49,7 +36,7 @@ int main(int argv, char* argc[])
         char* buffer = malloc(strlen(line_contents));
         if (buffer == NULL) {
             printf("ERROR: Could not allocate memory for buffer! \n");
-            exit(1);
+            return NULL;
         }
         strcpy(buffer, "\0");
 
@@ -58,7 +45,7 @@ int main(int argv, char* argc[])
             col_number++;
             const char ch = line_contents[i];
 
-            if (strchr(special_chars, ch) != NULL || strchr(white_space, ch) != NULL) {
+            if (strchr(SPECIAL_CHARS, ch) != NULL || strchr(WHITE_SPACE, ch) != NULL) {
                 if (strlen(buffer) > 0) {
                     Position *pos = new_pos(file_name, line_number, col_number);
                     Lexeme *l = new_lexeme(buffer, *pos);
@@ -87,15 +74,40 @@ int main(int argv, char* argc[])
         free(buffer);
     }
     free(line_contents);
+
+    return arr;
+}
+
+
+int main(int argv, char* argc[])
+{
+    if (argv < 2) {
+        printf("ERROR: No file is provided!\n");
+        printf("Usage: lexer <file>\n");
+        exit(1);
+    }
+    FILE *fptr = NULL;
+
+    char* file_name = argc[1];
+    fptr = fopen(file_name, "rb");
+
+    if (fptr == NULL) {
+        printf("ERROR: Could not open file %s\n", file_name);
+        exit(1);
+    }
+
+    Lexemes *lexemes = lex_file(fptr, file_name);
+    if (lexemes == NULL) exit(1);
+
     fclose(fptr);
 
     printf("Finished lexing file.\n");
 
-    for(int i = 0; i < arr->count; i++) {
-        print_lexeme(arr->items[i]);
+    for(int i = 0; i < lexemes->count; i++) {
+        print_lexeme(lexemes->items[i]);
     }
 
-    free_lexemes(arr);
+    free_lexemes(lexemes);
 
     return 0;
 }
