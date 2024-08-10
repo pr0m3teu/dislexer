@@ -69,9 +69,9 @@ void free_lexeme(Lexeme *lexeme)
     }
 }
 
-Dynamic_Array* new_darray()
+Lexemes* new_darray()
 {
-    Dynamic_Array* arr = malloc(sizeof(Dynamic_Array));
+    Lexemes* arr = malloc(sizeof(Lexemes));
     if (arr == NULL) return NULL;
 
     arr->size = DEFAULT_SIZE;
@@ -83,7 +83,7 @@ Dynamic_Array* new_darray()
     return arr;
 }
 
-int da_append(Dynamic_Array *arr, Lexeme item)
+int da_append(Lexemes *arr, Lexeme item)
 {
     if (arr->count < arr->size)
     {
@@ -100,7 +100,7 @@ int da_append(Dynamic_Array *arr, Lexeme item)
     return 0;
 }
 
-void free_darray(Dynamic_Array *arr)
+void free_lexemes(Lexemes *arr)
 {
     // TODO: Make this work so it doesn't leak memory.
     // for (int i = 0; i < arr->count; i++) {

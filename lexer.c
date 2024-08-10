@@ -40,7 +40,7 @@ int main(int argv, char* argc[])
     const char white_space[] = " \n\t";
 
     int line_number = 0;
-    Dynamic_Array *arr = new_darray();
+    Lexemes *arr = new_darray();
     while (fgets(line_contents, file_size, fptr))
     {
         line_number++;
@@ -95,7 +95,7 @@ int main(int argv, char* argc[])
         print_lexeme(arr->items[i]);
     }
 
-    free_darray(arr);
+    free_lexemes(arr);
 
     return 0;
 }
