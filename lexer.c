@@ -40,6 +40,7 @@ int main(int argv, char* argc[])
     const char white_space[] = " \n\t";
 
     int line_number = 0;
+    Dynamic_Array *arr = new_darray();
     while (fgets(line_contents, file_size, fptr))
     {
         line_number++;
@@ -61,16 +62,16 @@ int main(int argv, char* argc[])
                 if (strlen(buffer) > 0) {
                     Position *pos = new_pos(file_name, line_number, col_number);
                     Lexeme *l = new_lexeme(buffer, *pos);
-                    print_lexeme(*l);
-                    free_lexeme(l);
+                    // print_lexeme(*l);
+                    da_append(arr, *l);
                 }
 
                 strncpy(buffer, &ch, 1);
                 strncpy(buffer+1, "\0", 1);
                 Position *pos = new_pos(file_name, line_number, col_number);
                 Lexeme *l = new_lexeme(buffer, *pos);
-                print_lexeme(*l);
-                free_lexeme(l);
+                // print_lexeme(*l);
+                da_append(arr, *l);
                 strncpy(buffer, "\0", 1); // Maybe a good idea?
                 continue;
             }
@@ -87,6 +88,14 @@ int main(int argv, char* argc[])
     }
     free(line_contents);
     fclose(fptr);
+
+    printf("Finished lexing file.\n");
+
+    for(int i = 0; i < arr->count; i++) {
+        print_lexeme(arr->items[i]);
+    }
+
+    free_darray(arr);
 
     return 0;
 }

@@ -4,6 +4,8 @@
 
 #include "lexeme.h"
 
+#define DEFAULT_SIZE 256
+
 Position* new_pos(const char* const file_name, int line, int col)
 {
     Position* pos = malloc(sizeof(Position));
@@ -65,4 +67,48 @@ void free_lexeme(Lexeme *lexeme)
         free_pos(&lexeme->pos);
         free(lexeme->value);
     }
+}
+
+Dynamic_Array* new_darray()
+{
+    Dynamic_Array* arr = malloc(sizeof(Dynamic_Array));
+    if (arr == NULL) return NULL;
+
+    arr->size = DEFAULT_SIZE;
+    arr->count = 0;
+    arr->items = malloc(DEFAULT_SIZE * sizeof(Lexeme));
+
+    if (arr->items == NULL) return NULL;
+
+    return arr;
+}
+
+int da_append(Dynamic_Array *arr, Lexeme item)
+{
+    if (arr->count < arr->size)
+    {
+        arr->items[arr->count] = item;
+    }
+    else
+    {
+        arr->size += DEFAULT_SIZE;
+        arr->items = realloc(arr->items, (arr->size)*sizeof(Lexeme));
+        if(arr->items == NULL) return -1;
+        arr->items[arr->count] = item;
+    }
+    arr->count++;
+    return 0;
+}
+
+void free_darray(Dynamic_Array *arr)
+{
+    // TODO: Make this work so it doesn't leak memory.
+    // for (int i = 0; i < arr->count; i++) {
+    //     free_lexeme(&arr->items[i]);
+    // }
+
+    free(arr->items);
+
+    free(arr);
+    printf("Freed da_array.\n");
 }
