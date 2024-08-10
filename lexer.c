@@ -2,10 +2,118 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "lexeme.h"
+#include "lexer.h"
 
+#define DEFAULT_SIZE 256
 #define SPECIAL_CHARS "*&#!();_-.?\\:\"'"
 #define WHITE_SPACE " \n\t"
+
+Position* new_pos(const char* const file_name, int line, int col)
+{
+    Position* pos = malloc(sizeof(Position));
+    if (pos == NULL) return NULL;
+
+    pos->file_name = malloc(sizeof(strlen(file_name)));
+    if (pos->file_name == NULL) return NULL;
+    // pos->file_name = file_name; This should be wrong.
+    strncpy(pos->file_name, file_name, strlen(file_name)); // This should be correct.
+    pos->line = line;
+    pos->col = col;
+
+    return pos;
+}
+
+
+void free_pos(Position* pos)
+{
+    if (pos != NULL)
+    {
+
+        free(pos->file_name);
+        free(pos);
+
+    }
+}
+
+Lexeme* new_lexeme(char* val, Position pos)
+{
+    Lexeme* lexeme = malloc(sizeof(Lexeme));
+    if (lexeme == NULL) return NULL;
+
+    lexeme->value = malloc(strlen(val));
+    if (lexeme->value == NULL) return NULL;
+    strncpy(lexeme->value, val, strlen(val));
+    strncpy(lexeme->value+strlen(val),"\0" , 1);
+    lexeme->pos = pos;
+
+    return lexeme;
+}
+
+void print_lexeme(Lexeme lexeme)
+{
+    if (lexeme.value == NULL)
+    {
+        printf("ERROR: Lexeme seems to be empty!\n");
+        return;
+    }
+    printf("/%s:%d:%d : ", lexeme.pos.file_name, lexeme.pos.line, lexeme.pos.col);
+    printf("%s\n", lexeme.value);
+
+}
+
+void free_lexeme(Lexeme *lexeme)
+{
+    if (lexeme != NULL)
+    {
+
+        free_pos(&lexeme->pos);
+        free(lexeme->value);
+    }
+}
+
+Lexemes* new_darray()
+{
+    Lexemes* arr = malloc(sizeof(Lexemes));
+    if (arr == NULL) return NULL;
+
+    arr->size = DEFAULT_SIZE;
+    arr->count = 0;
+    arr->items = malloc(DEFAULT_SIZE * sizeof(Lexeme));
+
+    if (arr->items == NULL) return NULL;
+
+    return arr;
+}
+
+int da_append(Lexemes *arr, Lexeme item)
+{
+    if (arr->count < arr->size)
+    {
+        arr->items[arr->count] = item;
+    }
+    else
+    {
+        arr->size += DEFAULT_SIZE;
+        arr->items = realloc(arr->items, (arr->size)*sizeof(Lexeme));
+        if(arr->items == NULL) return -1;
+        arr->items[arr->count] = item;
+    }
+    arr->count++;
+    return 0;
+}
+
+void free_lexemes(Lexemes *arr)
+{
+    // TODO: Make this work so it doesn't leak memory.
+    // for (int i = 0; i < arr->count; i++) {
+    //     free_lexeme(&arr->items[i]);
+    // }
+
+    free(arr->items);
+
+    free(arr);
+    printf("Freed da_array.\n");
+}
 
 Lexemes* lex_file(FILE* file, const char* file_name)
 {
@@ -49,7 +157,6 @@ Lexemes* lex_file(FILE* file, const char* file_name)
                 if (strlen(buffer) > 0) {
                     Position *pos = new_pos(file_name, line_number, col_number);
                     Lexeme *l = new_lexeme(buffer, *pos);
-                    // print_lexeme(*l);
                     da_append(arr, *l);
                 }
 
@@ -57,9 +164,8 @@ Lexemes* lex_file(FILE* file, const char* file_name)
                 strncpy(buffer+1, "\0", 1);
                 Position *pos = new_pos(file_name, line_number, col_number);
                 Lexeme *l = new_lexeme(buffer, *pos);
-                // print_lexeme(*l);
                 da_append(arr, *l);
-                strncpy(buffer, "\0", 1); // Maybe a good idea?
+                strncpy(buffer, "\0", 1);
                 continue;
             }
 
@@ -76,38 +182,4 @@ Lexemes* lex_file(FILE* file, const char* file_name)
     free(line_contents);
 
     return arr;
-}
-
-
-int main(int argv, char* argc[])
-{
-    if (argv < 2) {
-        printf("ERROR: No file is provided!\n");
-        printf("Usage: lexer <file>\n");
-        exit(1);
-    }
-    FILE *fptr = NULL;
-
-    char* file_name = argc[1];
-    fptr = fopen(file_name, "rb");
-
-    if (fptr == NULL) {
-        printf("ERROR: Could not open file %s\n", file_name);
-        exit(1);
-    }
-
-    Lexemes *lexemes = lex_file(fptr, file_name);
-    if (lexemes == NULL) exit(1);
-
-    fclose(fptr);
-
-    printf("Finished lexing file.\n");
-
-    for(int i = 0; i < lexemes->count; i++) {
-        print_lexeme(lexemes->items[i]);
-    }
-
-    free_lexemes(lexemes);
-
-    return 0;
 }

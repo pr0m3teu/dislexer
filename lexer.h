@@ -1,6 +1,6 @@
 #ifndef LEXEME_H
 #define LEXEME_H
-
+#include <stdio.h>
 
 typedef struct {
     char* file_name;
@@ -32,4 +32,5 @@ void free_lexeme(Lexeme* lexeme);
 Lexemes* new_darray();
 int da_append(Lexemes* arr, Lexeme item);
 void free_lexemes(Lexemes* arr);
+Lexemes* lex_file(FILE* file, const char* file_name);
 #endif // LEXEME_H
