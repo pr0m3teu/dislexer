@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <time.h>
 #include "lexer.h"
 
 #define DEFAULT_SIZE 256
-#define SPECIAL_CHARS "*&#!();_-.?\\:\"'"
+#define SPECIAL_CHARS "*&#!();-.=?\\:\"'"
 #define WHITE_SPACE " \n\t"
 
 Position* new_pos(const char* const file_name, int line, int col)
@@ -133,15 +131,19 @@ Lexemes* lex_file(FILE* file, const char* file_name)
     // Allcate buffer for file contents
     char *line_contents = malloc(file_size);
     if (line_contents == NULL){
-        printf("ERROR: Could not allocate memory for string.\n");
+        printf("ERROR: Could not allocate memory for reading file.\n");
         return NULL;
     }
 
+    Lexemes *arr = new_darray();
+    if (arr == NULL){
+        printf("ERROR: Could not allocate memory for lexemes.\n");
+        return NULL;
+    }
+
+
     // Getting file contents
     int line_number = 0;
-    Lexemes *arr = new_darray();
-
-    if(arr == NULL) return NULL;
     while (fgets(line_contents, file_size, file))
     {
         line_number++;
@@ -175,7 +177,7 @@ Lexemes* lex_file(FILE* file, const char* file_name)
                 continue;
             }
 
-            if (isalnum(ch)){
+            else {
                 strncat(buffer, &ch, 1);
                 strncpy(buffer+strlen(buffer), "\0", 1);
                 col_number--;
