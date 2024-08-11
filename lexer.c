@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #include "lexer.h"
 
 #define DEFAULT_SIZE 256
@@ -17,6 +18,7 @@ Position* new_pos(const char* const file_name, int line, int col)
     if (pos->file_name == NULL) return NULL;
     // pos->file_name = file_name; This should be wrong.
     strncpy(pos->file_name, file_name, strlen(file_name)); // This should be correct.
+    strncpy(pos->file_name+strlen(file_name),"\0" , 1);
     pos->line = line;
     pos->col = col;
 
@@ -28,14 +30,14 @@ void free_pos(Position* pos)
 {
     if (pos != NULL)
     {
-
         free(pos->file_name);
+        pos->file_name = NULL;
         free(pos);
-
+        pos = NULL;
     }
 }
 
-Lexeme* new_lexeme(char* val, Position pos)
+Lexeme* new_lexeme(char* val, Position* pos)
 {
     Lexeme* lexeme = malloc(sizeof(Lexeme));
     if (lexeme == NULL) return NULL;
@@ -56,7 +58,7 @@ void print_lexeme(Lexeme lexeme)
         printf("ERROR: Lexeme seems to be empty!\n");
         return;
     }
-    printf("/%s:%d:%d : ", lexeme.pos.file_name, lexeme.pos.line, lexeme.pos.col);
+    printf("/%s:%d:%d : ", lexeme.pos->file_name, lexeme.pos->line, lexeme.pos->col);
     printf("%s\n", lexeme.value);
 
 }
@@ -66,8 +68,10 @@ void free_lexeme(Lexeme *lexeme)
     if (lexeme != NULL)
     {
 
-        free_pos(&lexeme->pos);
+        free_pos(lexeme->pos);
         free(lexeme->value);
+        lexeme->value = NULL;
+
     }
 }
 
@@ -104,14 +108,16 @@ int da_append(Lexemes *arr, Lexeme item)
 
 void free_lexemes(Lexemes *arr)
 {
-    // TODO: Make this work so it doesn't leak memory.
-    // for (int i = 0; i < arr->count; i++) {
-    //     free_lexeme(&arr->items[i]);
-    // }
 
+    for (int i = 0; i < arr->count; i++) {
+        free_lexeme(&arr->items[i]);
+    }
     free(arr->items);
+    arr->items = NULL;
 
     free(arr);
+    arr = NULL;
+
     printf("Freed da_array.\n");
 }
 
@@ -156,14 +162,14 @@ Lexemes* lex_file(FILE* file, const char* file_name)
             if (strchr(SPECIAL_CHARS, ch) != NULL || strchr(WHITE_SPACE, ch) != NULL) {
                 if (strlen(buffer) > 0) {
                     Position *pos = new_pos(file_name, line_number, col_number);
-                    Lexeme *l = new_lexeme(buffer, *pos);
+                    Lexeme *l = new_lexeme(buffer, pos);
                     da_append(arr, *l);
                 }
 
                 strncpy(buffer, &ch, 1);
                 strncpy(buffer+1, "\0", 1);
                 Position *pos = new_pos(file_name, line_number, col_number);
-                Lexeme *l = new_lexeme(buffer, *pos);
+                Lexeme *l = new_lexeme(buffer, pos);
                 da_append(arr, *l);
                 strncpy(buffer, "\0", 1);
                 continue;
@@ -178,8 +184,9 @@ Lexemes* lex_file(FILE* file, const char* file_name)
         }
 
         free(buffer);
+        buffer = NULL;
     }
     free(line_contents);
-
+    line_contents = NULL;
     return arr;
 }
