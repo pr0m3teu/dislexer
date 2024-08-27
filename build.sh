@@ -1,4 +1,7 @@
 #!/bin/bash
 
 set -xe
-clang -o lexer -O3 main.c lexer.c
+CFLAGS="-Wall -Wextra -O3"  
+
+clang -o lexer $CFLAGS main.c lexer.c
+
