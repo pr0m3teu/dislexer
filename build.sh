@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -xe
-CFLAGS="-Wall -Wextra -O3"  
+CFLAGS="-Wall -Wextra -O3 -std=c11"  
 
-clang -o lexer $CFLAGS main.c lexer.c
+clang -o ./build/lexer $CFLAGS main.c lexer.c
 

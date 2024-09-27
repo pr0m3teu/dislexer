@@ -12,7 +12,7 @@ Position* new_pos(const char* const file_name, int line, int col)
     Position* pos = malloc(sizeof(Position));
     if (pos == NULL) return NULL;
 
-    pos->file_name = malloc(sizeof(strlen(file_name)));
+    pos->file_name = malloc(sizeof(strlen(file_name))); //This looks sus
     if (pos->file_name == NULL) return NULL;
     // pos->file_name = file_name; This should be wrong.
     strncpy(pos->file_name, file_name, strlen(file_name)); // This should be correct.
