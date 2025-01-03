@@ -29,8 +29,8 @@ Lexeme* new_lexeme(char* val, Position* pos);
 void print_lexeme(Lexeme lexeme);
 void free_lexeme(Lexeme* lexeme);
 
-Lexemes* new_darray();
+void new_darray(Lexemes* arr);
 int da_append(Lexemes* arr, Lexeme item);
 void free_lexemes(Lexemes* arr);
-Lexemes* lex_file(FILE* file, const char* file_name);
+void lex_file(Lexemes* arr, FILE* file, const char* file_name);
 #endif // LEXEME_H
