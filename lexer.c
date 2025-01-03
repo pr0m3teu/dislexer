@@ -12,11 +12,11 @@ Position* new_pos(const char* const file_name, int line, int col)
     Position* pos = malloc(sizeof(Position));
     if (pos == NULL) return NULL;
 
-    pos->file_name = malloc(sizeof(strlen(file_name))); //This looks sus
+    pos->file_name = malloc((strlen(file_name) + 1) * sizeof(char));
     if (pos->file_name == NULL) return NULL;
-    // pos->file_name = file_name; This should be wrong.
-    strncpy(pos->file_name, file_name, strlen(file_name)); // This should be correct.
-    strncpy(pos->file_name+strlen(file_name),"\0" , 1);
+
+    strncpy(pos->file_name, file_name, strlen(file_name) + 1);
+
     pos->line = line;
     pos->col = col;
 
@@ -42,8 +42,7 @@ Lexeme* new_lexeme(char* val, Position* pos)
 
     lexeme->value = malloc(strlen(val));
     if (lexeme->value == NULL) return NULL;
-    strncpy(lexeme->value, val, strlen(val));
-    strncpy(lexeme->value+strlen(val),"\0" , 1);
+    strncpy(lexeme->value, val, strlen(val) + 1);
     lexeme->pos = pos;
 
     return lexeme;
@@ -154,20 +153,24 @@ void lex_file(Lexemes* arr, FILE* file, const char* file_name)
         }
         strcpy(buffer, "\0");
 
-
         for (size_t i = 0; i < strlen(line_contents); i++) {
             col_number++;
             const char ch = line_contents[i];
 
             if (strchr(SPECIAL_CHARS, ch) != NULL || strchr(WHITE_SPACE, ch) != NULL) {
+                // Add current word to array
                 if (strlen(buffer) > 0) {
+                    //strncpy(buffer+strlen(buffer), "\0", 1);
+                    strncat(buffer, "\0", 1);
                     Position *pos = new_pos(file_name, line_number, col_number);
                     Lexeme *l = new_lexeme(buffer, pos);
                     da_append(arr, *l);
                 }
-
+                
+                // Append char
                 strncpy(buffer, &ch, 1);
                 strncpy(buffer+1, "\0", 1);
+
                 Position *pos = new_pos(file_name, line_number, col_number);
                 Lexeme *l = new_lexeme(buffer, pos);
                 da_append(arr, *l);
@@ -177,7 +180,6 @@ void lex_file(Lexemes* arr, FILE* file, const char* file_name)
 
             else {
                 strncat(buffer, &ch, 1);
-                strncpy(buffer+strlen(buffer), "\0", 1);
                 col_number--;
                 continue;
             }
