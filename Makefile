@@ -1,4 +1,4 @@
-CFLAGS=-Wall -Wextra -std=c11 -pedantic -O3
+CFLAGS=-Wall -Wextra -std=c11 -pedantic -O1
 CC=clang
 
 .PHONY: all

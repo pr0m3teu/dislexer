@@ -26,9 +26,9 @@ int main(int argv, char* argc[])
 
     printf("Finished lexing file.\n");
 
-    for(int i = 0; i < lexemes.count; i++) {
-        print_lexeme(lexemes.items[i]);
-    }
+//    for(int i = 0; i < lexemes.count; i++) {
+//        print_lexeme(lexemes.items[i]);
+//    }
 
     free_lexemes(&lexemes);
 

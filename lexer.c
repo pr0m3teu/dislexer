@@ -30,20 +30,46 @@ void free_pos(Position* pos)
     {
         free(pos->file_name);
         pos->file_name = NULL;
-        free(pos);
-        pos = NULL;
     }
 }
 
-Lexeme* new_lexeme(char* val, Position* pos)
+void add_pos(Lexeme* l, Position pos)
+{
+
+    l->pos = malloc(sizeof(Position));
+
+    if (l->pos == NULL)
+    {
+        fprintf(stderr, "ERROR: Could not copy position\n");
+        exit(1);
+    }
+
+    
+   // if(!memcpy(l->pos, pos, sizeof(Position)))
+   // {
+   //     fprintf(stderr, "ERROR: Could not copy position\n");
+   //     exit(1);
+   // }
+    
+   l->pos->file_name = pos.file_name;
+   l->pos->line = pos.line;
+   l->pos->col = pos.col;
+}
+
+Lexeme* new_lexeme(char* val, Position pos)
 {
     Lexeme* lexeme = malloc(sizeof(Lexeme));
-    if (lexeme == NULL) return NULL;
+    if (lexeme == NULL) 
+    {
+        fprintf(stderr, "ERROR: Could not allocate memory");
+        exit(1);
+    }
 
-    lexeme->value = malloc(strlen(val));
+    lexeme->value = malloc(strlen(val) + 1);
     if (lexeme->value == NULL) return NULL;
+
     strncpy(lexeme->value, val, strlen(val) + 1);
-    lexeme->pos = pos;
+    add_pos(lexeme, pos);
 
     return lexeme;
 }
@@ -66,9 +92,10 @@ void free_lexeme(Lexeme *lexeme)
     {
 
         free_pos(lexeme->pos);
+        free(lexeme->pos);
+        lexeme->pos = NULL;
         free(lexeme->value);
         lexeme->value = NULL;
-
     }
 }
 
@@ -111,7 +138,7 @@ void free_lexemes(Lexemes *arr)
         free_lexeme(&arr->items[i]);
     }
     free(arr->items);
-    arr->items = NULL;
+    printf("------------------------FREEED----------------\n");
 
     printf("Freed da_array.\n");
 }
@@ -146,7 +173,7 @@ void lex_file(Lexemes* arr, FILE* file, const char* file_name)
         line_number++;
         int col_number = 0;
 
-        char* buffer = malloc(strlen(line_contents));
+        char* buffer = malloc(strlen(line_contents) + 1);
         if (buffer == NULL) {
             fprintf(stderr, "ERROR: Could not allocate memory for buffer! \n");
             exit(1);
@@ -162,19 +189,24 @@ void lex_file(Lexemes* arr, FILE* file, const char* file_name)
                 if (strlen(buffer) > 0) {
                     //strncpy(buffer+strlen(buffer), "\0", 1);
                     strncat(buffer, "\0", 1);
-                    Position *pos = new_pos(file_name, line_number, col_number);
-                    Lexeme *l = new_lexeme(buffer, pos);
+                    //Position *pos = new_pos(file_name, line_number, col_number);
+
+                    Lexeme *l = new_lexeme(buffer, (Position) { (char*) file_name, line_number, col_number});
                     da_append(arr, *l);
+                    //free_pos(pos);
+                    free_lexeme(l);
                 }
                 
                 // Append char
                 strncpy(buffer, &ch, 1);
                 strncpy(buffer+1, "\0", 1);
 
-                Position *pos = new_pos(file_name, line_number, col_number);
-                Lexeme *l = new_lexeme(buffer, pos);
+                //Position *pos = new_pos(file_name, line_number, col_number);
+                Lexeme *l = new_lexeme(buffer, (Position) { (char*) file_name, line_number, col_number});
                 da_append(arr, *l);
                 strncpy(buffer, "\0", 1);
+                free_lexeme(l);
+                //free_pos(pos);
                 continue;
             }
 

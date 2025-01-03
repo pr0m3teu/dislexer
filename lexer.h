@@ -25,7 +25,9 @@ typedef struct {
 Position* new_pos(const char* const file_name, int line, int col);
 void free_pos(Position* pos);
 
-Lexeme* new_lexeme(char* val, Position* pos);
+
+void add_pos(Lexeme* l, Position pos);
+Lexeme* new_lexeme(char* val, Position pos);
 void print_lexeme(Lexeme lexeme);
 void free_lexeme(Lexeme* lexeme);
 
