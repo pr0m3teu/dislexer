@@ -73,18 +73,19 @@ void free_lexeme(Lexeme *lexeme)
     }
 }
 
-Lexemes* new_darray()
+void new_darray(Lexemes* arr)
 {
-    Lexemes* arr = malloc(sizeof(Lexemes));
-    if (arr == NULL) return NULL;
+    if (arr == NULL) return;
 
     arr->size = DEFAULT_SIZE;
     arr->count = 0;
     arr->items = malloc(DEFAULT_SIZE * sizeof(Lexeme));
 
-    if (arr->items == NULL) return NULL;
-
-    return arr;
+    if (arr->items == NULL)
+    {
+        fprintf(stderr, "ERROR: Could not allocate array\n");
+        exit(1);
+    }
 }
 
 int da_append(Lexemes *arr, Lexeme item)
@@ -113,13 +114,10 @@ void free_lexemes(Lexemes *arr)
     free(arr->items);
     arr->items = NULL;
 
-    free(arr);
-    arr = NULL;
-
     printf("Freed da_array.\n");
 }
 
-Lexemes* lex_file(FILE* file, const char* file_name)
+void lex_file(Lexemes* arr, FILE* file, const char* file_name)
 {
     // Find EOF
     fseek(file, 0L, SEEK_END);
@@ -131,15 +129,15 @@ Lexemes* lex_file(FILE* file, const char* file_name)
     // Allcate buffer for file contents
     char *line_contents = malloc(file_size);
     if (line_contents == NULL){
-        printf("ERROR: Could not allocate memory for reading file.\n");
-        return NULL;
+        fprintf(stderr, "ERROR: Could not allocate memory for reading file.\n");
+        exit(1); 
     }
 
-    Lexemes *arr = new_darray();
     if (arr == NULL){
-        printf("ERROR: Could not allocate memory for lexemes.\n");
-        return NULL;
+        fprintf(stderr, "ERROR: Could not allocate memory for lexemes.\n");
+        exit(1);
     }
+    new_darray(arr);
 
 
     // Getting file contents
@@ -151,13 +149,13 @@ Lexemes* lex_file(FILE* file, const char* file_name)
 
         char* buffer = malloc(strlen(line_contents));
         if (buffer == NULL) {
-            printf("ERROR: Could not allocate memory for buffer! \n");
-            return NULL;
+            fprintf(stderr, "ERROR: Could not allocate memory for buffer! \n");
+            exit(1);
         }
         strcpy(buffer, "\0");
 
 
-        for (int i = 0; i < strlen(line_contents); i++) {
+        for (size_t i = 0; i < strlen(line_contents); i++) {
             col_number++;
             const char ch = line_contents[i];
 
@@ -190,5 +188,4 @@ Lexemes* lex_file(FILE* file, const char* file_name)
     }
     free(line_contents);
     line_contents = NULL;
-    return arr;
 }

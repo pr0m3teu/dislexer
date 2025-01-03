@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "lexer.h"
 
 int main(int argv, char* argc[])
@@ -20,18 +19,18 @@ int main(int argv, char* argc[])
         exit(1);
     }
 
-    Lexemes *lexemes = lex_file(fptr, file_name);
+    Lexemes lexemes = {0};
+    lex_file(&lexemes, fptr, file_name);
     fclose(fptr);
-    if (lexemes == NULL) exit(1);
 
 
     printf("Finished lexing file.\n");
 
-    for(int i = 0; i < lexemes->count; i++) {
-        print_lexeme(lexemes->items[i]);
+    for(int i = 0; i < lexemes.count; i++) {
+        print_lexeme(lexemes.items[i]);
     }
 
-    free_lexemes(lexemes);
+    free_lexemes(&lexemes);
 
     return 0;
 }
