@@ -18,9 +18,11 @@ int main(int argv, char* argc[])
         printf("ERROR: Could not open file %s\n", file_name);
         exit(1);
     }
+    List ptrs = {0};
+    ptrs.size = 0;
 
     Lexemes lexemes = {0};
-    lex_file(&lexemes, fptr, file_name);
+    lex_file(&ptrs, &lexemes, fptr, file_name);
     fclose(fptr);
 
 
@@ -30,7 +32,11 @@ int main(int argv, char* argc[])
 //        print_lexeme(lexemes.items[i]);
 //    }
 
-    free_lexemes(&lexemes);
+    free_lexemes(&ptrs, &lexemes);
+    printf("Unfreed Items: %lu\n", ptrs.size);
+    lfree_all(&ptrs);
+    printf("Unfreed Items: %lu\n", ptrs.size);
+
 
     return 0;
 }

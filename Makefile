@@ -6,11 +6,11 @@ all:
 	make main
 	make clean
 
-main: main.c  lexer.o
-	$(CC) -o ./build/lexer $(CFLAGS) main.c lexer.o
+main: main.c  #lexer.o
+	$(CC) -o ./build/lexer $(CFLAGS) main.c lexer.c
 
-lexer.o: lexer.c lexer.h snur.o
-	$(CC) -c $(CFLAGS) lexer.c 
+#lexer.o: lexer.c lexer.h snur.o
+#	$(CC) -c $(CFLAGS) lexer.c 
 
 .PHONY: clean
 clean:
